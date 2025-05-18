@@ -1,0 +1,42 @@
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-root',
+  template: `<div *ngFor="let device of devices">
+                <h3>{{ device.name }}</h3>
+                <button (click)="fetchData(device.id)">Fetch Data</button>
+                <div *ngFor="let log of logs[device.id]">
+                  <p>{{ log.data }}</p>
+                </div>
+             </div>`,
+})
+export class AppComponent implements OnInit {
+  devices = [];
+  logs = {};
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.http.get('/api/devices').subscribe((data: any) => this.devices = data);
+  }
+
+  fetchData(deviceId) {
+    this.http.get(`/api/devices/${deviceId}/logs`).subscribe((data: any) => this.logs[deviceId] = data);
+  }
+}
+
+// app.module.ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, HttpClientModule],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

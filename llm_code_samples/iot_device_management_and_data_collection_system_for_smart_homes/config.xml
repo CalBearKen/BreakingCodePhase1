@@ -1,0 +1,40 @@
+// dashboard.vue
+<template>
+  <div>
+    <h1>Admin Dashboard</h1>
+    <div v-for="device in devices" :key="device.device_id">
+      <h3>{{ device.device_id }}</h3>
+      <p>Status: {{ device.state }}</p>
+      <button @click="updateFirmware(device.device_id)">Update Firmware</button>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      devices: []
+    };
+  },
+  created() {
+    this.fetchDevices();
+  },
+  methods: {
+    fetchDevices() {
+      axios.get('https://api.your-iot-platform.com/devices')
+        .then(response => {
+          this.devices = response.data;
+        });
+    },
+    updateFirmware(deviceId) {
+      axios.post(`https://api.your-iot-platform.com/devices/${deviceId}/firmware`)
+        .then(response => {
+          alert('Firmware updated successfully');
+        });
+    }
+  }
+};
+</script>

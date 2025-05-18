@@ -1,0 +1,249 @@
+{
+  "results": [
+    {
+      "check_id": "llm-security-1150",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\functions.py",
+      "start": {
+        "line": 9,
+        "col": 1
+      },
+      "end": {
+        "line": 10,
+        "col": 1
+      },
+      "extra": {
+        "message": "Hardcoded URL and Port",
+        "severity": "WARNING",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The URL and port for the Apache NiFi REST API are hardcoded. This could lead to issues if the API is moved or the port is changed.",
+          "recommendation": "Consider using environment variables or a configuration file to store these values, which can be easily changed as needed."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-3774",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\functions.py",
+      "start": {
+        "line": 28,
+        "col": 1
+      },
+      "end": {
+        "line": 29,
+        "col": 1
+      },
+      "extra": {
+        "message": "Lack of Error Handling",
+        "severity": "WARNING",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The function create_nifi_process_group() does not handle any potential errors that may occur during the request. This could lead to unexpected behavior or crashes.",
+          "recommendation": "Add error handling to catch potential issues and provide meaningful feedback."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-7249",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\HL7Parser.py",
+      "start": {
+        "line": 6,
+        "col": 1
+      },
+      "end": {
+        "line": 7,
+        "col": 1
+      },
+      "extra": {
+        "message": "File Path Injection",
+        "severity": "ERROR",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The HL7Parser class takes a file path as an argument and directly opens it. This could potentially allow an attacker to read arbitrary files on the system.",
+          "recommendation": "Validate the file path and ensure it is within the expected directory."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-284",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\source.hcl",
+      "start": {
+        "line": 4,
+        "col": 1
+      },
+      "end": {
+        "line": 5,
+        "col": 1
+      },
+      "extra": {
+        "message": "Hardcoded Google Cloud Platform Configuration",
+        "severity": "WARNING",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The Google Cloud Platform configuration is hardcoded, including the project ID and region. This could lead to issues if these values need to be changed.",
+          "recommendation": "Consider using environment variables or a configuration file to store these values, which can be easily changed as needed."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-1063",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\source.hcl",
+      "start": {
+        "line": 5,
+        "col": 1
+      },
+      "end": {
+        "line": 6,
+        "col": 1
+      },
+      "extra": {
+        "message": "Sensitive File Exposure",
+        "severity": "ERROR",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The path to the Google Cloud Platform service account file is hardcoded. This could potentially expose sensitive information if the file is not properly secured.",
+          "recommendation": "Ensure the service account file is properly secured and consider using a more secure method to provide the credentials to the application."
+        },
+        "lines": ""
+      }
+    }
+  ],
+  "errors": [],
+  "static_scan": {
+    "semgrep": [],
+    "bandit": [],
+    "llm": [
+      {
+        "check_id": "llm-security-1150",
+        "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\functions.py",
+        "start": {
+          "line": 9,
+          "col": 1
+        },
+        "end": {
+          "line": 10,
+          "col": 1
+        },
+        "extra": {
+          "message": "Hardcoded URL and Port",
+          "severity": "WARNING",
+          "metadata": {
+            "tool": "llm_analysis",
+            "model": "gpt-4",
+            "description": "The URL and port for the Apache NiFi REST API are hardcoded. This could lead to issues if the API is moved or the port is changed.",
+            "recommendation": "Consider using environment variables or a configuration file to store these values, which can be easily changed as needed."
+          },
+          "lines": ""
+        }
+      },
+      {
+        "check_id": "llm-security-3774",
+        "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\functions.py",
+        "start": {
+          "line": 28,
+          "col": 1
+        },
+        "end": {
+          "line": 29,
+          "col": 1
+        },
+        "extra": {
+          "message": "Lack of Error Handling",
+          "severity": "WARNING",
+          "metadata": {
+            "tool": "llm_analysis",
+            "model": "gpt-4",
+            "description": "The function create_nifi_process_group() does not handle any potential errors that may occur during the request. This could lead to unexpected behavior or crashes.",
+            "recommendation": "Add error handling to catch potential issues and provide meaningful feedback."
+          },
+          "lines": ""
+        }
+      },
+      {
+        "check_id": "llm-security-7249",
+        "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\HL7Parser.py",
+        "start": {
+          "line": 6,
+          "col": 1
+        },
+        "end": {
+          "line": 7,
+          "col": 1
+        },
+        "extra": {
+          "message": "File Path Injection",
+          "severity": "ERROR",
+          "metadata": {
+            "tool": "llm_analysis",
+            "model": "gpt-4",
+            "description": "The HL7Parser class takes a file path as an argument and directly opens it. This could potentially allow an attacker to read arbitrary files on the system.",
+            "recommendation": "Validate the file path and ensure it is within the expected directory."
+          },
+          "lines": ""
+        }
+      },
+      {
+        "check_id": "llm-security-284",
+        "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\source.hcl",
+        "start": {
+          "line": 4,
+          "col": 1
+        },
+        "end": {
+          "line": 5,
+          "col": 1
+        },
+        "extra": {
+          "message": "Hardcoded Google Cloud Platform Configuration",
+          "severity": "WARNING",
+          "metadata": {
+            "tool": "llm_analysis",
+            "model": "gpt-4",
+            "description": "The Google Cloud Platform configuration is hardcoded, including the project ID and region. This could lead to issues if these values need to be changed.",
+            "recommendation": "Consider using environment variables or a configuration file to store these values, which can be easily changed as needed."
+          },
+          "lines": ""
+        }
+      },
+      {
+        "check_id": "llm-security-1063",
+        "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\complex_healthcare_system_with_sensitive_data_processing_and_hipaa_compliance_simulations\\source.hcl",
+        "start": {
+          "line": 5,
+          "col": 1
+        },
+        "end": {
+          "line": 6,
+          "col": 1
+        },
+        "extra": {
+          "message": "Sensitive File Exposure",
+          "severity": "ERROR",
+          "metadata": {
+            "tool": "llm_analysis",
+            "model": "gpt-4",
+            "description": "The path to the Google Cloud Platform service account file is hardcoded. This could potentially expose sensitive information if the file is not properly secured.",
+            "recommendation": "Ensure the service account file is properly secured and consider using a more secure method to provide the credentials to the application."
+          },
+          "lines": ""
+        }
+      }
+    ]
+  },
+  "summary": {
+    "total_findings": 5,
+    "severity_counts": {
+      "ERROR": 2,
+      "WARNING": 3,
+      "INFO": 0
+    }
+  }
+}

@@ -1,0 +1,3 @@
+# application.properties
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=fraud_detection_group

@@ -1,0 +1,73 @@
+{
+  "results": [
+    {
+      "check_id": "llm-security-3376",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\financial_transactions_processing_application_with_blockchain_account_verification\\Main.java",
+      "start": {
+        "line": 13,
+        "col": 1
+      },
+      "end": {
+        "line": 14,
+        "col": 1
+      },
+      "extra": {
+        "message": "Hardcoded Private Key",
+        "severity": "ERROR",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The application contains a hardcoded private key. This is a security risk because anyone who has access to the source code will also have access to the private key. This could allow an attacker to impersonate the application, decrypt sensitive data, or perform other unauthorized actions.",
+          "recommendation": "Remove the hardcoded private key from the source code. Instead, use a secure method to store and retrieve sensitive data, such as environment variables or a secure vault service."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-6500",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\financial_transactions_processing_application_with_blockchain_account_verification\\Main.java",
+      "start": {
+        "line": 14,
+        "col": 1
+      },
+      "end": {
+        "line": 15,
+        "col": 1
+      },
+      "extra": {
+        "message": "Insecure Communication with Ethereum Node",
+        "severity": "ERROR",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The application communicates with an Ethereum node over HTTP, which is not secure. This could allow an attacker to intercept and manipulate the data being sent between the application and the Ethereum node.",
+          "recommendation": "Use HTTPS instead of HTTP to communicate with the Ethereum node. This will encrypt the data being sent between the application and the Ethereum node, preventing it from being intercepted or manipulated."
+        },
+        "lines": ""
+      }
+    },
+    {
+      "check_id": "llm-security-5513",
+      "path": "C:\\Projects\\LLM_Security_Eval\\llm_security_eval\\llm_code_samples\\financial_transactions_processing_application_with_blockchain_account_verification\\Main.java",
+      "start": {
+        "line": 22,
+        "col": 1
+      },
+      "end": {
+        "line": 23,
+        "col": 1
+      },
+      "extra": {
+        "message": "Unvalidated Transaction",
+        "severity": "ERROR",
+        "metadata": {
+          "tool": "llm_analysis",
+          "model": "gpt-4",
+          "description": "The validateTransaction method always returns true, regardless of the input. This means that any transaction, even an invalid or malicious one, will be accepted. This could allow an attacker to perform unauthorized transactions.",
+          "recommendation": "Implement proper validation logic in the validateTransaction method. This should include checking that the transaction hash is valid and that the transaction meets any other necessary criteria."
+        },
+        "lines": ""
+      }
+    }
+  ]
+}

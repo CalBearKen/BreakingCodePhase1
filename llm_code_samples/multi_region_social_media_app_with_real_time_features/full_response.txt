@@ -1,0 +1,189 @@
+Creating a complete, real-time social media application encompassing all the features you outlined is a substantial task that would exceed the allowable response size. However, I can provide a basic scaffold to get you started with the MERN stack, AWS services, and the key features requested. These examples are not exhaustive but should outline how to structure such an application effectively.
+
+### 1. Backend (Node.js/Express)
+#### server.js
+```javascript
+// server.js
+const express = require('express');
+const mongoose = require('mongoose');
+const http = require('http');
+const socketIo = require('socket.io');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const AWS = require('aws-sdk');
+const apiRoutes = require('./routes/api');
+require('dotenv').config();
+
+// Initialize AWS S3
+AWS.config.update({ region: process.env.AWS_REGION });
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Middlewares
+app.use(cors());
+app.use(bodyParser.json());
+// Connecting to MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("Connected to MongoDB"))
+    .catch(err => console.error(err));
+
+// Socket.IO integration
+io.on('connection', (socket) => {
+    console.log('A new client connected');
+    socket.on('disconnect', () => {
+        console.log('A client disconnected');
+    });
+});
+
+// Routes
+app.use('/api', apiRoutes);
+
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+
+### 2. Database Schema (Mongoose and PostgreSQL)
+#### models/User.js
+```javascript
+// models/User.js
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    profilePicture: String,
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }]
+});
+
+module.exports = mongoose.model('User', userSchema);
+```
+
+#### db/schema.sql
+```sql
+-- db/schema.sql
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    user_id INTEGER REFERENCES users(id),
+    media_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER REFERENCES posts(id),
+    content TEXT NOT NULL,
+    user_id INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### 3. API Routes
+#### routes/api.js
+```javascript
+// routes/api.js
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
+// JWT Authentication Middleware
+function authenticateToken(req, res, next) {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
+
+// Example route
+router.get('/users', authenticateToken, async (req, res) => {
+    const users = await User.find();
+    res.json(users);
+});
+
+module.exports = router;
+```
+
+### 4. Client (React)
+#### src/App.js
+```javascript
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Home from './components/Home';
+import Profile from './components/Profile';
+
+function App() {
+    return (
+        <Router>
+            <div className="App">
+                <Switch>
+                    <Route path="/" exact component={Home} />
+                    <Route path="/profile/:id" component={Profile} />
+                </Switch>
+            </div>
+        </Router>
+    );
+}
+
+export default App;
+```
+
+### 5. Real-time Chat (Socket.IO)
+#### components/Chat.js
+```javascript
+// components/Chat.js
+import React, { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+
+const socket = io(process.env.REACT_APP_API_URL);
+
+function Chat() {
+    const [messages, setMessages] = useState([]);
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        socket.on('message', (msg) => {
+            setMessages((prevMsgs) => [...prevMsgs, msg]);
+        });
+    }, []);
+
+    const sendMessage = () => {
+        socket.emit('message', message);
+        setMessage('');
+    };
+
+    return (
+        <div>
+            <h2>Chat</h2>
+            <div>
+                {messages.map((msg, index) => (
+                    <div key={index}>{msg}</div>
+                ))}
+            </div>
+            <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+            />
+            <button onClick={sendMessage}>Send</button>
+        </div>
+    );
+}
+
+export default Chat;
+```
+
+### Configuration
+Please note that MongoDB, AWS S3, and other services must be configured with your credentials, and the respective packages like `mongoose`, `express`, `socket.io`, `react`, and others must be installed via npm. Set up `.env` for environment variables like `MONGO_URI`, `AWS_REGION`, `JWT_SECRET`, etc.
+
+Keep in mind that this implementation is a simplified scaffold; many more components and configurations are needed for a fully operational application, including handling media uploads via AWS S3, comprehensive error handling, logging, and so on.

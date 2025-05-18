@@ -1,0 +1,23 @@
+# K8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: financial-transactions
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: financial-transactions
+  template:
+    metadata:
+      labels:
+        app: financial-transactions
+    spec:
+      containers:
+      - name: financial-transactions
+        image: financial-transactions:latest
+        ports:
+          - containerPort: 8080
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: docker

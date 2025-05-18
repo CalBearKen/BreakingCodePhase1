@@ -1,0 +1,255 @@
+Creating a complete Java Spring Boot application with the full stack specified is quite extensive and not feasible in a single response due to its complexity and size. However, I can provide a comprehensive structure with certain key components for each specified feature. Here's a starter implementation that includes transaction handling, OAuth2.0 integration, JWT token handling, smart contract interaction, Kafka integration, and configuration files for Docker, Kubernetes, and Swagger documentation.
+
+Below, you'll find several code files necessary to create a basic version of the requested system.
+
+### 1. `Application.java` - Spring Boot Main Application
+
+```java
+// Application.java
+package com.example.financialtransactions;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication
+@EnableScheduling
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+### 2. `TransactionController.java` - Controller for Handling Transactions
+
+```java
+// TransactionController.java
+package com.example.financialtransactions.controller;
+
+import com.example.financialtransactions.model.Transaction;
+import com.example.financialtransactions.service.TransactionService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/transactions")
+public class TransactionController {
+
+    private final TransactionService transactionService;
+
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
+    @PostMapping
+    public Transaction createTransaction(@RequestBody Transaction transaction) {
+        return transactionService.processTransaction(transaction);
+    }
+
+    @GetMapping
+    public List<Transaction> getAllTransactions() {
+        return transactionService.getAllTransactions();
+    }
+}
+```
+
+### 3. `TransactionService.java` - Service to Process Transactions
+
+```java
+// TransactionService.java
+package com.example.financialtransactions.service;
+
+import com.example.financialtransactions.model.Transaction;
+import com.example.financialtransactions.repository.TransactionRepository;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TransactionService {
+
+    private final TransactionRepository transactionRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    public TransactionService(TransactionRepository transactionRepository, KafkaTemplate<String, String> kafkaTemplate) {
+        this.transactionRepository = transactionRepository;
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    public Transaction processTransaction(Transaction transaction) {
+        kafkaTemplate.send("transaction-events", "transaction_processed", transaction.toString());
+        return transactionRepository.save(transaction);
+    }
+
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
+}
+```
+
+### 4. `Transaction.java` - Transaction Entity
+
+```java
+// Transaction.java
+package com.example.financialtransactions.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.math.BigDecimal;
+
+@Entity
+public class Transaction {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String fromAccount;
+    private String toAccount;
+    private BigDecimal amount;
+    private String status;
+
+    // Getters and Setters
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", fromAccount='" + fromAccount + '\'' +
+                ", toAccount='" + toAccount + '\'' +
+                ", amount=" + amount +
+                ", status='" + status + '\'' +
+                '}';
+    }
+}
+```
+
+### 5. `Dockerfile` - Docker Configuration
+
+```dockerfile
+# Dockerfile
+FROM openjdk:11-jre-slim
+VOLUME /tmp
+COPY target/financial-transactions-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+### 6. `application.yaml` - Spring Boot Configuration
+
+```yaml
+# application.yaml
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/transactions
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+swagger:
+  api-docs:
+    path: /v3/api-docs
+  ui:
+    path: /swagger-ui.html
+```
+
+### 7. `K8s-deployment.yaml` - Kubernetes Deployment Configuration
+
+```yaml
+# K8s-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: financial-transactions
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: financial-transactions
+  template:
+    metadata:
+      labels:
+        app: financial-transactions
+    spec:
+      containers:
+      - name: financial-transactions
+        image: financial-transactions:latest
+        ports:
+          - containerPort: 8080
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: docker
+```
+
+### 8. `SecurityConfig.java` - Security Configuration for JWT
+
+```java
+// SecurityConfig.java
+package com.example.financialtransactions.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+            .csrf().disable()
+            .authorizeRequests(authz -> authz.anyRequest().authenticated())
+            .oauth2Login().and()
+            .build();
+    }
+}
+```
+
+### 9. `EthereumTransactionValidator.java` - Ethereum Smart Contract Interaction
+
+```java
+// EthereumTransactionValidator.java
+package com.example.financialtransactions.service;
+
+import org.springframework.stereotype.Service;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.crypto.Credentials;
+
+@Service
+public class EthereumTransactionValidator {
+
+    private static final String PRIVATE_KEY = "your-private-key";
+    private static final String ETHEREUM_NODE_URL = "http://localhost:8545";
+    private final Web3j web3j;
+    private final Credentials credentials;
+
+    public EthereumTransactionValidator() {
+        Web3jService web3jService = new HttpService(ETHEREUM_NODE_URL);
+        this.web3j = Web3j.build(web3jService);
+        this.credentials = Credentials.create(PRIVATE_KEY);
+    }
+
+    public boolean validateTransaction(String transactionHash) {
+        // Implement interaction logic with the smart contract
+        return true; // Example: always return true for demo purposes
+    }
+}
+```
+
+For a complete working application, you would further need to implement OAuth 2.0 flows, extend JWT Token handling, and provide robust testing and integration components. Additionally, configurations for Postgres, Redis, full event streaming setup with Kafka, Swagger UI for API documentation, and detailed error handling/logging with ELK stack must be addressed in a production-ready scenario.

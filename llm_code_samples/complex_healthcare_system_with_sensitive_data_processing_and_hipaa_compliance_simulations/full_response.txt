@@ -1,0 +1,190 @@
+Below is the implementation code for the system described. The code is divided into several files as specified. Please ensure you have the necessary environment and dependencies installed.
+
+### 1. `app.py`
+This is the main Flask application file.
+
+```python
+# app.py
+
+from flask import Flask, jsonify, request
+import psycopg2
+import pika
+import json
+from oidc_rbac import authenticate_and_authorize
+
+app = Flask(__name__)
+
+# Establish database connection
+conn = psycopg2.connect(
+    dbname='your_db',
+    user='your_user',
+    password='your_pass',
+    host='localhost'
+)
+
+@app.route('/patients', methods=['GET'])
+@authenticate_and_authorize('read:patient')
+def get_patients():
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM patients")
+    patients = cur.fetchall()
+    cur.close()
+    return jsonify(patients)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.json
+    # Process webhook data from external services
+    return jsonify({'status': 'success'}), 200
+
+
+@app.route('/tasks', methods=['POST'])
+@authenticate_and_authorize('create:task')
+def create_task():
+    # Send task to RabbitMQ
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='task_queue', durable=True)
+    
+    task_data = request.json
+    channel.basic_publish(
+        exchange='',
+        routing_key='task_queue',
+        body=json.dumps(task_data),
+        properties=pika.BasicProperties(
+            delivery_mode=2,  # Make message persistent
+        ))
+    connection.close()
+    
+    return jsonify({'status': 'task created'}), 201
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+### 2. `oidc_rbac.py`
+Handles OpenID Connect authentication and RBAC.
+
+```python
+# oidc_rbac.py
+
+from functools import wraps
+from flask import request, jsonify
+
+def authenticate_and_authorize(required_scope):
+    def wrapper(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Authenticate using OIDC: Validate token and decode
+            auth_header = request.headers.get('Authorization', None)
+            if not auth_header:
+                return jsonify({'error': 'Authorization header is expected'}), 401
+            
+            # Token validation logic here
+            
+            # RBAC: Check if the required scope is allowed
+            # Assuming roles and scopes are decoded from access token
+            token_roles = ["read:patient"]
+            if required_scope not in token_roles:
+                return jsonify({'error': 'Not authorized to access this resource'}), 403
+                
+            return f(*args, **kwargs)
+        return decorated_function
+    return wrapper
+```
+
+### 3. `hl7_parser.py`
+Custom HL7 file parser for processing HL7 formatted files.
+
+```python
+# hl7_parser.py
+
+class HL7Parser:
+    def __init__(self, hl7_file):
+        self.hl7_file = hl7_file
+
+    def parse(self):
+        with open(self.hl7_file, 'r') as file:
+            data = file.read()
+            segments = data.split('\n')
+            parsed_data = {}
+            # This is a simple parser for demonstration
+            for segment in segments:
+                if segment.startswith('PID'):
+                    parsed_data['patient_id'] = segment.split('|')[2]
+                # Add more parsing logic for different segments
+            return parsed_data
+```
+
+### 4. `terraform_setup.tf`
+Terraform file for setting up on Google Cloud Platform with multi-region.
+
+```hcl
+# terraform_setup.tf
+
+provider "google" {
+  credentials = file("path/to/your-service-account-file.json")
+  project     = "your-project-id"
+  region      = "us-central1"
+}
+
+resource "google_compute_instance" "default" {
+  name         = "example-instance"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-9"
+    }
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {
+    }
+  }
+}
+
+# Add more resources for multi-region setup
+```
+
+### 5. `nifi_etl_pipeline.py`
+Script to set up an ETL pipeline using Apache NiFi.
+
+```python
+# nifi_etl_pipeline.py
+
+import requests
+import json
+
+def create_nifi_process_group():
+    # This is a simplified representation of creating a component
+    # You need Apache NiFi running and REST API accessible
+    url = "http://localhost:8080/nifi-api/process-groups/root/process-groups"
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        "revision": {
+            "version": 0
+        },
+        "component": {
+            "name": "Lab Results ETL",
+            "position": {
+                "x": 100,
+                "y": 100
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    return response.json()
+
+create_nifi_process_group()
+```
+
+Please ensure you have the necessary services running (e.g., PostgreSQL, RabbitMQ, Apache NiFi) and adjust the configuration settings like database credentials, queue names, etc., as required for your environment.
